@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>PeerJS Audio Streaming</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js"
+        integrity="sha512-iFU+yF1keEaLDC9HEwPfLMSRaS0unBHE14GEgx6pQKJXjp5v0tvX8xpfp2lgJ62XEjbYp/M5C3CAmej/PWXMyA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+
+<body>
+    <h1>PeerJS Audio Stream</h1>
+    <input type="text" id="destination-id" placeholder="Enter Destination Peer ID">
+    <button id="connect-button">Connect</button>
+    <button id="start-button">Start Streaming</button>
+    <script>
+        const destinationInput = document.getElementById('destination-id');
+        const connectButton = document.getElementById('connect-button');
+        const startButton = document.getElementById('start-button');
+        var audioStream ;
+        let peerConnection; // Store the connection object
+        const peer = new Peer();
+
+        peer.on('open', (id) => {
+            console.log('My peer ID is:', id);
+        });
+
+        peer.on('error', (err) => {
+            console.error('Peer connection error:', err);
+        });
+
+        var call = peer.call();
+
+        peer.on('call', function (call) {
+            // Answer the call, providing our mediaStream
+            console.log('call', call);
+            call.answer(audioStream);
+        });
+
+        connectButton.addEventListener('click', async () => {
+            const destinationId = destinationInput.value;
+
+            if (!destinationId) {
+                alert('Please enter a destination Peer ID');
+                return;
+            }
+
+
+
+            peerConnection = peer.connect(destinationId); // Initiate connection
+
+            peerConnection.on('open', () => {
+                console.log('Connected to peer:', destinationId);
+                startButton.disabled = false; // Enable start button after connection
+            });
+
+            peerConnection.on('error', (err) => {
+                console.error('Connection error:', err);
+                peerConnection = null; // Clear connection object on error
+                startButton.disabled = true; // Disable start button on error
+            });
+        });
+
+        startButton.addEventListener('click', async () => {
+            if (!peerConnection) {
+                alert('Please connect to a peer first');
+                return;
+            }
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+                // peerConnection.send(stream); // Send the audio stream
+
+                call = peer.call(destinationInput.value, stream);
+                audioStream = stream;
+                call.on('stream', function (stream) {
+                    console.log('stream');
+                    // `stream` is the MediaStream of the remote peer.
+                    // Here you'd add it to an HTML video/canvas element.
+                });
+
+
+            } catch (error) {
+                console.error(error);
+            }
+        });
+    </script>
+</body>
+
+</html>
