@@ -39,6 +39,16 @@
             // Answer the call, providing our mediaStream
             console.log('call', call);
             call.answer(audioStream);
+            const audioElement = document.createElement('audio');
+            audioElement.style.display = 'none'; // Hide the audio element visually
+            document.body.appendChild(audioElement);
+            call.on('stream', function (remoteStream) {
+                console.log('stream', remoteStream);
+                audioElement.srcObject = remoteStream;
+                audioElement.play(); // Start playing the received audio stream
+            });
+
+
         });
 
         connectButton.addEventListener('click', async () => {
