@@ -14,16 +14,19 @@
     <input type="text" id="destination-id" placeholder="Enter Destination Peer ID">
     <button id="connect-button">Connect</button>
     <button id="start-button">Start Streaming</button>
+    <br><br>
+    <span id="showPeers"></span>
     <script>
         const destinationInput = document.getElementById('destination-id');
         const connectButton = document.getElementById('connect-button');
         const startButton = document.getElementById('start-button');
-        var audioStream ;
+        var audioStream;
         let peerConnection; // Store the connection object
         const peer = new Peer();
 
         peer.on('open', (id) => {
             console.log('My peer ID is:', id);
+            document.getElementById('showPeers').innerHTML = id;
         });
 
         peer.on('error', (err) => {
